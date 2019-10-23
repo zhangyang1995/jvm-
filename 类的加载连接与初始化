@@ -1,6 +1,7 @@
 
 在java代码中，类型的加载，连接与初始化过程都是在程序运行期间完成的。
-加载：把已经存在的class文件从磁盘加载到内存  查找并加载类的二进制数据
+加载：把已经存在的class文件从磁盘加载到内存  查找并加载类的二进制数据 放入运行时数据区的方法区内，
+      内存中创建了一个java.lang.class中用来封装方法区内的数据结构
 连接：将类与类之间的关系对应好，对字节码的校验。 
   1.验证：确保被加载类的正确性符合jvm对字节码格式要求
   2.准备：为类的静态变量分配内存，并将其初始化为默认值
@@ -23,3 +24,128 @@
 
 类加载器
 每一个类型都是由类加载器加载到内存当中的
+
+java程序对类的使用方式分为两种
+1.主动使用 创建类的实例 访问某个类或者接口的静态变量或对静态变量赋值 调用类的静态方法 反射 初始化一个类的子类 
+2.被动使用
+所有java的java虚拟机实现必须在每个类或接口被java程序"首次主动使用"时才初始化他
+
+加载.class文件的方式
+1.从本地系统中直接加载
+2.通过网络下载.class文件
+3.从zip jar等归档文件中加载.class文件 （第三方库）
+4.从专有数据库中
+5.将java源文件动态编译为.class文件（动态代理）
+
+例子 code
+/**
+ * 对于静态字段来说只有直接定义字段的类才能被初始化
+ * 当一个类在初始化时要求其父类都已初始化完毕了
+ * 
+ */
+public class Mytest1 {
+    public static void main(String[] args) {
+        System.out.println(mychild1.str);
+//        System.out.println(mychild1.str2);
+    }
+}
+class myparent1{
+    public static String str ="hello world";
+    static {
+        System.out.println("Myparetn static block");
+    }
+}
+class mychild1 extends myparent1{
+        public static String str2 ="welcome";
+        static {
+            System.out.println("mychild1 static block");
+        }
+
+}
+
+
+/*
+ 在编译阶段常量就会被存入 调用这个常量的方法所在的类的常量池中
+  本质上调用类没有直接引用到定义常量的类，因此并不会被初始化
+  将常量存放在myTest2的常量池中myTest2与myparent2没关系
+  甚至可以将myparent2的class文件删除
+
+  助记符
+  ldc 表示将 int flost 或者 string类型的常量值从常量池推到栈顶
+  bipush表示将单字节（-128-127）常量值从常量池推到栈顶
+  sipush表示将一个短整型（-32768-32767）常量值从常量池推到栈顶
+  iconst_1表示将一个int型1常量值从常量池推到栈顶
+  iconst_2表示将一个int型2常量值从常量池推到栈顶
+ */
+public class myTest2 {
+    public static void main(String[] args) {
+        System.out.println(myparent2.s);
+    }
+}
+class myparent2{
+        //在编译阶段常量就会被存入 调用这个常量的方法所在的类的常量池中
+        public static final String str = "helloworld";
+        public static final short s = 127;
+        public static final short i = 128;
+        public static final short m = 1;
+//        public static String str = "helloworld";
+        static {
+            System.out.println("Myparent2 static bolck");
+        }
+}
+
+/**
+ * 不是编译期常量
+ * 当一个常量的值并非编译期间可以确定的，name其值就不会放到被调用类的常量池之中
+ * 这时运行会导致，主动使用这个常量池所在的类，显然会导致这个类初始化
+ */
+public class myTest3 {
+    public static void main(String[] args) {
+        System.out.println(myparent3.str);
+    }
+}
+
+class  myparent3{
+    public static final  String str = UUID.randomUUID().toString();
+    static {
+        System.out.println("myparent3 static block");
+    }
+}
+
+
+/*
+    new出实例 主动使用 静态代码块只会被初始化一次
+    对于数组实例来说其类型是jvm在运行期动态动态生成的，表示为[Lmyparent4  这种形式
+    动态生成的类型及父类型均是object 对数组来说javaDoc经常将构成数组的元素为Component 实际就是将数组降低一个维度后
+ */
+public class myTest4 {
+    public static void main(String[] args) {
+//        myparent4 myparent4 = new myparent4();
+//        myparent4 myparent5 = new myparent4();
+        myparent4[] myparent4s = new myparent4[1];
+        System.out.println(myparent4s.getClass());
+        myparent4[][] myparent4s1 = new myparent4[1][1];
+        System.out.println(myparent4s1);
+        System.out.println(myparent4s1.getClass().getSuperclass());
+
+    }
+}
+class myparent4{
+    static {
+        System.out.println("myparent4 static block");
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
