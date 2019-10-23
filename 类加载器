@@ -1,0 +1,12 @@
+类的加载
+
+java虚拟机自带的加载器
+启动加载器 bootstrap
+拓展类加载器extension
+系统类加载器 system
+
+用户自定义的类加载器
+java.lang.classloader
+用户可以指定类的加载方式
+
+类加载器不需要等到某个类被首次主动使用时候在加载
