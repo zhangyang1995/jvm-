@@ -136,6 +136,24 @@ class myparent4{
     }
 }
 
+import java.util.Random;
+
+/*
+    当一个接口初始化时并不要求其父接口完成了初始化
+    只有当真正使用到父接口（入如引用到父接口所定义的常量时候），才会初始化
+ */
+public class myTest5 {
+    public static void main(String[] args) {
+        System.out.println(mychild5.b);
+    }
+}
+interface  myparent5 {
+    public static final int a =5;
+}
+interface  mychild5 extends  myparent5{
+//    public static final int b=6;
+        public static final int  b = new Random().nextInt(2);
+}
 
 
 
